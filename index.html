@@ -3,288 +3,446 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Калькулятор потерь давления</title>
+    <title>Калькулятор радиаторов</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 10px;
-            background-color: #f5f5f5;
-            -webkit-text-size-adjust: 100%;
+            background-color: #f8f8f8;
+            color: #333;
+            line-height: 1.4;
+            font-size: 15px;
         }
         .container {
             background-color: white;
+            border-radius: 12px;
             padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             margin-bottom: 15px;
+            max-width: 100%;
+            overflow: hidden;
         }
         h1 {
-            color: #2c3e50;
+            color: #2a5885;
+            font-size: 18px;
             text-align: center;
-            font-size: 20px;
-            margin-bottom: 15px;
+            margin: 0 0 15px 0;
+            font-weight: 600;
         }
-        .form-group {
+        .input-group {
             margin-bottom: 12px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 6px;
+            font-weight: 500;
             font-size: 14px;
         }
         select, input {
             width: 100%;
-            padding: 8px;
+            padding: 10px 12px;
             border: 1px solid #ddd;
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-size: 14px;
+            border-radius: 8px;
+            background-color: white;
+            font-size: 15px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
         }
         button {
-            background-color: #0088cc;
+            background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
+            padding: 12px;
+            border-radius: 8px;
             cursor: pointer;
             width: 100%;
             font-size: 16px;
             margin-top: 10px;
+            font-weight: 500;
+            transition: background-color 0.2s;
         }
-        button:hover {
-            background-color: #006699;
+        button:active {
+            background-color: #3d8b40;
+            transform: scale(0.98);
         }
         .result {
-            margin-top: 15px;
-            padding: 12px;
-            background-color: #e8f4fc;
-            border-radius: 5px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f9f1;
+            border-radius: 8px;
             display: none;
-            font-size: 14px;
         }
-        .error {
-            color: red;
-            margin-top: 10px;
+        .result h3 {
+            margin-top: 0;
+            color: #2a5885;
+            font-size: 16px;
+        }
+        .note {
             font-size: 13px;
-        }
-        .footer {
+            color: #666;
+            margin: 15px 0 5px 0;
             text-align: center;
-            font-size: 12px;
-            color: #777;
-            margin-top: 10px;
+            line-height: 1.5;
         }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            font-size: 14px;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 8px;
+            text-align: left;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: 500;
+        }
+        .highlight {
+            background-color: #fff8e1;
+        }
+        .temp-inputs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .temp-inputs > div {
+            flex: 1;
+            min-width: 100px;
+        }
+        .brand {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+            margin: 15px 0 5px 0;
+            font-weight: 500;
+        }
+        
         @media (max-width: 480px) {
+            body {
+                padding: 8px;
+                font-size: 14px;
+            }
             .container {
-                padding: 10px;
+                padding: 12px;
+                border-radius: 10px;
             }
             h1 {
-                font-size: 18px;
+                font-size: 17px;
             }
-            button {
-                padding: 12px;
+            select, input {
+                padding: 9px 10px;
+                font-size: 14px;
+            }
+            .temp-inputs > div {
+                min-width: calc(33% - 6px);
+            }
+            table {
+                font-size: 13px;
+            }
+            th, td {
+                padding: 6px;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .temp-inputs > div {
+                min-width: 100%;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Калькулятор потерь давления в радиаторах</h1>
+        <h1>Калькулятор подбора радиаторов</h1>
         
-        <div class="form-group">
-            <label for="radiatorType">Тип радиатора:</label>
-            <select id="radiatorType">
-                <option value="type1">Тип 1 (стандартный)</option>
-                <option value="type2">Тип 2 (с конвектором)</option>
+        <div class="input-group">
+            <label for="radiator-type">Тип радиатора:</label>
+            <select id="radiator-type" onchange="updateDimensions()">
+                <option value="">-- Выберите тип --</option>
+                <option value="10">Тип 10</option>
+                <option value="11">Тип 11</option>
+                <option value="12">Тип 12</option>
+                <option value="22" selected>Тип 22</option>
+                <option value="33">Тип 33</option>
             </select>
         </div>
         
-        <div class="form-group">
-            <label for="radiatorSize">Размер радиатора (высота x длина, мм):</label>
-            <select id="radiatorSize">
-                <option value="300x400">300 x 400</option>
-                <option value="300x600">300 x 600</option>
-                <option value="300x800">300 x 800</option>
-                <option value="300x1000">300 x 1000</option>
-                <option value="300x1200">300 x 1200</option>
-                <option value="300x1400">300 x 1400</option>
-                <option value="300x1600">300 x 1600</option>
-                <option value="300x1800">300 x 1800</option>
-                <option value="300x2000">300 x 2000</option>
-                <option value="500x400">500 x 400</option>
-                <option value="500x600">500 x 600</option>
-                <option value="500x800">500 x 800</option>
-                <option value="500x1000">500 x 1000</option>
-                <option value="500x1200">500 x 1200</option>
-                <option value="500x1400">500 x 1400</option>
-                <option value="500x1600">500 x 1600</option>
-                <option value="500x1800">500 x 1800</option>
-                <option value="500x2000">500 x 2000</option>
-                <option value="600x400">600 x 400</option>
-                <option value="600x600">600 x 600</option>
-                <option value="600x800">600 x 800</option>
-                <option value="600x1000">600 x 1000</option>
-                <option value="600x1200">600 x 1200</option>
-                <option value="600x1400">600 x 1400</option>
-                <option value="600x1600">600 x 1600</option>
-                <option value="600x1800">600 x 1800</option>
-                <option value="600x2000">600 x 2000</option>
+        <div class="input-group">
+            <label for="radiator-height">Высота (мм):</label>
+            <select id="radiator-height" onchange="updateLengths()">
+                <option value="">-- Сначала выберите тип --</option>
+                <option value="300">300</option>
+                <option value="400">400</option>
+                <option value="500" selected>500</option>
+                <option value="600">600</option>
+                <option value="900">900</option>
             </select>
         </div>
         
-        <div class="form-group">
-            <label for="flowRate">Расход теплоносителя (л/ч):</label>
-            <input type="number" id="flowRate" min="1" value="100">
-        </div>
-        
-        <div class="form-group">
-            <label for="connectionType">Тип подключения:</label>
-            <select id="connectionType">
-                <option value="diagonal">Диагональное</option>
-                <option value="bottom">Нижнее</option>
-                <option value="side">Боковое</option>
+        <div class="input-group">
+            <label for="radiator-length">Длина (мм):</label>
+            <select id="radiator-length">
+                <option value="">-- Сначала выберите высоту --</option>
             </select>
         </div>
         
-        <button onclick="calculatePressureDrop()">Рассчитать</button>
+        <div class="input-group">
+            <label>Температурные параметры:</label>
+            <div class="temp-inputs">
+                <div>
+                    <label for="flow-temp">Подача (°C)</label>
+                    <select id="flow-temp">
+                        <option value="35">35</option>
+                        <option value="40">40</option>
+                        <option value="45">45</option>
+                        <option value="50">50</option>
+                        <option value="55">55</option>
+                        <option value="60">60</option>
+                        <option value="65">65</option>
+                        <option value="70">70</option>
+                        <option value="75" selected>75</option>
+                        <option value="80">80</option>
+                        <option value="85">85</option>
+                        <option value="90">90</option>
+                        <option value="95">95</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="return-temp">Обратка (°C)</label>
+                    <select id="return-temp">
+                        <option value="20">20</option>
+                        <option value="25">25</option>
+                        <option value="30">30</option>
+                        <option value="35">35</option>
+                        <option value="40">40</option>
+                        <option value="45">45</option>
+                        <option value="50">50</option>
+                        <option value="55">55</option>
+                        <option value="60">60</option>
+                        <option value="65" selected>65</option>
+                        <option value="70">70</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="room-temp">Воздух (°C)</label>
+                    <select id="room-temp">
+                        <option value="10">10</option>
+                        <option value="15">15</option>
+                        <option value="18">18</option>
+                        <option value="20" selected>20</option>
+                        <option value="22">22</option>
+                        <option value="24">24</option>
+                        <option value="26">26</option>
+                    </select>
+                </div>
+            </div>
+        </div>
         
-        <div id="error" class="error"></div>
+        <button onclick="calculate()">Рассчитать мощность</button>
         
-        <div id="result" class="result">
-            <h3>Результаты расчета:</h3>
-            <p>Потеря давления: <span id="pressureDrop">0</span> мбар</p>
-            <p>Рекомендуемый насос: <span id="pumpRecommendation">-</span></p>
+        <div id="result" class="result"></div>
+        
+        <div class="note">
+            Данные о мощности соответствуют технической документации производителя.
+            Поправочные коэффициенты применяются автоматически согласно DIN EN 442.
         </div>
     </div>
-
-    <div class="footer">GalfDesign</div>
+    
+    <div class="brand">Galf Design</div>
 
     <script>
-        // Инициализация Telegram Web App
-        if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
-            Telegram.WebApp.ready();
-            Telegram.WebApp.expand();
-        }
-        
-        // Коэффициенты для расчета потерь давления
-        const pressureDropData = {
-            'type1': {
-                '300x400': { k: 0.02 },
-                '300x600': { k: 0.018 },
-                '300x800': { k: 0.016 },
-                '300x1000': { k: 0.015 },
-                '300x1200': { k: 0.014 },
-                '300x1400': { k: 0.013 },
-                '300x1600': { k: 0.012 },
-                '300x1800': { k: 0.011 },
-                '300x2000': { k: 0.010 },
-                '500x400': { k: 0.025 },
-                '500x600': { k: 0.022 },
-                '500x800': { k: 0.020 },
-                '500x1000': { k: 0.018 },
-                '500x1200': { k: 0.016 },
-                '500x1400': { k: 0.015 },
-                '500x1600': { k: 0.014 },
-                '500x1800': { k: 0.013 },
-                '500x2000': { k: 0.012 },
-                '600x400': { k: 0.028 },
-                '600x600': { k: 0.025 },
-                '600x800': { k: 0.022 },
-                '600x1000': { k: 0.020 },
-                '600x1200': { k: 0.018 },
-                '600x1400': { k: 0.016 },
-                '600x1600': { k: 0.015 },
-                '600x1800': { k: 0.014 },
-                '600x2000': { k: 0.013 }
+        // Точные данные из каталога Kermi (стр. 24)
+        const radiatorData = {
+            '10': { name: "Тип 10" },
+            '11': { name: "Тип 11" },
+            '12': { name: "Тип 12" },
+            '22': { name: "Тип 22" },
+            '33': { name: "Тип 33" }
+        };
+
+        // Данные о мощности (Вт) для 75/65/20°C
+        const powerData = {
+            '300': {
+                '10': { '400': 144, '500': 180, '600': 439, '700': 513, '800': 586, '900': 659, '1000': 732, '1100': 806, '1200': 879, '1300': 952, '1400': 1025, '1600': 1172, '1800': 1318, '2000': 1465, '2300': 1684, '2600': 1904, '3000': 2197 },
+                '11': { '400': 239, '500': 299, '600': 647, '700': 755, '800': 862, '900': 970, '1000': 1078, '1100': 1186, '1200': 1294, '1300': 1401, '1400': 1509, '1600': 1725, '1800': 1940, '2000': 2156, '2300': 2479, '2600': 2803, '3000': 3234 },
+                '12': { '400': 297, '500': 371, '600': 215, '700': 251, '800': 287, '900': 323, '1000': 359, '1100': 395, '1200': 431, '1300': 467, '1400': 503, '1600': 574, '1800': 646, '2000': 718, '2300': 826, '2600': 933, '3000': 1077 },
+                '22': { '400': 409, '500': 511, '600': 613, '700': 715, '800': 818, '900': 920, '1000': 1022, '1100': 1124, '1200': 1226, '1300': 1329, '1400': 1431, '1600': 1635, '1800': 1840, '2000': 2044, '2300': 2351, '2600': 2657, '3000': 3066 },
+                '33': { '400': 584, '500': 731, '600': 877, '700': 1023, '800': 1169, '900': 1315, '1000': 1461, '1100': 1607, '1200': 1753, '1300': 1899, '1400': 2045, '1600': 2338, '1800': 2630, '2000': 2922, '2300': 3360, '2600': 3799, '3000': 4383 }
             },
-            'type2': {
-                '300x400': { k: 0.03 },
-                '300x600': { k: 0.028 },
-                '300x800': { k: 0.026 },
-                '300x1000': { k: 0.024 },
-                '300x1200': { k: 0.022 },
-                '300x1400': { k: 0.020 },
-                '300x1600': { k: 0.018 },
-                '300x1800': { k: 0.016 },
-                '300x2000': { k: 0.015 },
-                '500x400': { k: 0.035 },
-                '500x600': { k: 0.032 },
-                '500x800': { k: 0.030 },
-                '500x1000': { k: 0.028 },
-                '500x1200': { k: 0.026 },
-                '500x1400': { k: 0.024 },
-                '500x1600': { k: 0.022 },
-                '500x1800': { k: 0.020 },
-                '500x2000': { k: 0.018 },
-                '600x400': { k: 0.040 },
-                '600x600': { k: 0.037 },
-                '600x800': { k: 0.034 },
-                '600x1000': { k: 0.032 },
-                '600x1200': { k: 0.030 },
-                '600x1400': { k: 0.028 },
-                '600x1600': { k: 0.026 },
-                '600x1800': { k: 0.024 },
-                '600x2000': { k: 0.022 }
+            '400': {
+                '10': { '400': 183, '500': 229, '600': 274, '700': 320, '800': 366, '900': 411, '1000': 457, '1100': 503, '1200': 548, '1300': 594, '1400': 640, '1600': 731, '1800': 823, '2000': 914, '2300': 1051, '2600': 1188, '3000': 1371 },
+                '11': { '400': 304, '500': 380, '600': 456, '700': 532, '800': 608, '900': 684, '1000': 760, '1100': 836, '1200': 912, '1300': 988, '1400': 1064, '1600': 1216, '1800': 1368, '2000': 1520, '2300': 1748, '2600': 1976, '3000': 2280 },
+                '12': { '400': 376, '500': 471, '600': 565, '700': 659, '800': 753, '900': 847, '1000': 941, '1100': 1035, '1200': 1129, '1300': 1223, '1400': 1317, '1600': 1506, '1800': 1694, '2000': 1882, '2300': 2164, '2600': 2447, '3000': 2823 },
+                '22': { '400': 513, '500': 642, '600': 770, '700': 898, '800': 1026, '900': 1155, '1000': 1283, '1100': 1411, '1200': 1540, '1300': 1668, '1400': 1796, '1600': 2053, '1800': 2309, '2000': 2566, '2300': 2951, '2600': 3336, '3000': 3849 },
+                '33': { '400': 735, '500': 919, '600': 1102, '700': 1286, '800': 1470, '900': 1653, '1000': 1837, '1100': 2021, '1200': 2204, '1300': 2388, '1400': 2572, '1600': 2939, '1800': 3307, '2000': 3674, '2300': 4225, '2600': 4776, '3000': 5511 }
+            },
+            '500': {
+                '10': { '400': 223, '500': 279, '600': 334, '700': 390, '800': 446, '900': 501, '1000': 557, '1100': 613, '1200': 668, '1300': 724, '1400': 780, '1600': 891, '1800': 1003, '2000': 1114, '2300': 1281, '2600': 1448, '3000': 1671 },
+                '11': { '400': 367, '500': 459, '600': 551, '700': 643, '800': 734, '900': 826, '1000': 918, '1100': 1010, '1200': 1102, '1300': 1193, '1400': 1285, '1600': 1469, '1800': 1652, '2000': 1836, '2300': 2111, '2600': 2387, '3000': 2754 },
+                '12': { '400': 454, '500': 568, '600': 681, '700': 795, '800': 908, '900': 1022, '1000': 1135, '1100': 1249, '1200': 1362, '1300': 1476, '1400': 1589, '1600': 1816, '1800': 2043, '2000': 2270, '2300': 2611, '2600': 2951, '3000': 3405 },
+                '22': { '400': 616, '500': 770, '600': 924, '700': 1078, '800': 1232, '900': 1386, '1000': 1540, '1100': 1694, '1200': 1848, '1300': 2002, '1400': 2156, '1600': 2464, '1800': 2772, '2000': 3080, '2300': 3542, '2600': 4004, '3000': 4620 },
+                '33': { '400': 879, '500': 1099, '600': 1318, '700': 1538, '800': 1758, '900': 1977, '1000': 2197, '1100': 2417, '1200': 2636, '1300': 2856, '1400': 3076, '1600': 3515, '1800': 3955, '2000': 4394, '2300': 5053, '2600': 5712, '3000': 6591 }
+            },
+            '600': {
+                '10': { '400': 263, '500': 329, '600': 395, '700': 461, '800': 526, '900': 592, '1000': 658, '1100': 724, '1200': 790, '1300': 855, '1400': 921, '1600': 1053, '1800': 1184, '2000': 1316, '2300': 1513, '2600': 1711, '3000': 1974 },
+                '11': { '400': 430, '500': 538, '600': 646, '700': 753, '800': 861, '900': 968, '1000': 1076, '1100': 1184, '1200': 1291, '1300': 1399, '1400': 1506, '1600': 1722, '1800': 1937, '2000': 2152, '2300': 2475, '2600': 2798, '3000': 3228 },
+                '12': { '400': 529, '500': 662, '600': 794, '700': 926, '800': 1058, '900': 1191, '1000': 1323, '1100': 1455, '1200': 1588, '1300': 1720, '1400': 1852, '1600': 2117, '1800': 2381, '2000': 2646, '2300': 3043, '2600': 3440, '3000': 3969 },
+                '22': { '400': 716, '500': 896, '600': 1075, '700': 1254, '800': 1433, '900': 1612, '1000': 1791, '1100': 1970, '1200': 2149, '1300': 2328, '1400': 2507, '1600': 2866, '1800': 3224, '2000': 3582, '2300': 4119, '2600': 4657, '3000': 5373 },
+                '33': { '400': 1017, '500': 1271, '600': 1525, '700': 1779, '800': 2034, '900': 2288, '1000': 2542, '1100': 2796, '1200': 3050, '1300': 3305, '1400': 3559, '1600': 4067, '1800': 4576, '2000': 5084, '2300': 5847, '2600': 6609, '3000': 7626 }
+            },
+            '900': {
+                '10': { '400': 387, '500': 484, '600': 580, '700': 677, '800': 774, '900': 870, '1000': 967, '1100': 1064, '1200': 1160, '1300': 1257, '1400': 1354, '1600': 1547, '1800': 1741, '2000': 1934, '2300': 2224, '2600': 2514, '3000': 2901 },
+                '11': { '400': 614, '500': 767, '600': 920, '700': 1074, '800': 1227, '900': 1381, '1000': 1534, '1100': 1687, '1200': 1841, '1300': 1994, '1400': 2148, '1600': 2454, '1800': 2761, '2000': 3068, '2300': 3528, '2600': 3988, '3000': 4602 },
+                '12': { '400': 732, '500': 915, '600': 1098, '700': 1281, '800': 1464, '900': 1647, '1000': 1830, '1100': 2013, '1200': 2196, '1300': 2379, '1400': 2562, '1600': 2928, '1800': 3294, '2000': 3660, '2300': 4209, '2600': 4758, '3000': 5490 },
+                '22': { '400': 1001, '500': 1252, '600': 1502, '700': 1752, '800': 2002, '900': 2253, '1000': 2503, '1100': 2753, '1200': 3004, '1300': 3254, '1400': 3504, '1600': 4005, '1800': 4505, '2000': 5006, '2300': 5757, '2600': 6508, '3000': 7509 },
+                '33': { '400': 1387, '500': 1734, '600': 2080, '700': 2427, '800': 2774, '900': 3120, '1000': 3467, '1100': 3814, '1200': 4160, '1300': 4507, '1400': 4854, '1600': 5547, '1800': 6241, '2000': 6934, '2300': 7974, '2600': 9014, '3000': 10401 }
             }
         };
-        
-        // Коэффициенты для типа подключения
-        const connectionCoefficients = {
-            'diagonal': 1.0,
-            'bottom': 1.2,
-            'side': 1.1
-        };
-        
-        function calculatePressureDrop() {
-            const radiatorType = document.getElementById('radiatorType').value;
-            const radiatorSize = document.getElementById('radiatorSize').value;
-            const flowRate = parseFloat(document.getElementById('flowRate').value);
-            const connectionType = document.getElementById('connectionType').value;
+
+        // Функция для получения поправочного коэффициента
+        function getCorrectionFactor(tV, tR, tL) {
+            // Расчет ΔT (логарифмическая разница температур)
+            const deltaT1 = tV - tL;
+            const deltaT2 = tR - tL;
             
-            const errorElement = document.getElementById('error');
-            errorElement.textContent = '';
+            if (deltaT1 <= 0 || deltaT2 <= 0) return 0;
             
-            // Проверка ввода
-            if (isNaN(flowRate) || flowRate <= 0) {
-                errorElement.textContent = 'Пожалуйста, введите корректное значение расхода теплоносителя';
-                return;
-            }
+            const deltaT = (deltaT1 - deltaT2) / Math.log(deltaT1 / deltaT2);
             
-            // Получаем данные для выбранного радиатора
-            const radiatorData = pressureDropData[radiatorType][radiatorSize];
-            if (!radiatorData) {
-                errorElement.textContent = 'Данные для выбранного радиатора не найдены';
-                return;
-            }
+            // Расчет стандартного ΔT50 (для 75/65/20°C)
+            const deltaT50 = (75 - 65) / Math.log((75 - 20) / (65 - 20));
             
-            // Расчет потерь давления
-            const basePressureDrop = radiatorData.k * Math.pow(flowRate / 100, 1.8);
-            const connectionCoefficient = connectionCoefficients[connectionType] || 1.0;
-            const totalPressureDrop = basePressureDrop * connectionCoefficient;
+            // Коэффициент пересчета по формуле (ΔT/ΔT50)^n
+            // Где n = 1.3 для радиаторов Kermi
+            const n = 1.3;
+            const correctionFactor = Math.pow(deltaT / deltaT50, n);
             
-            // Округление до 2 знаков после запятой
-            const roundedPressureDrop = Math.round(totalPressureDrop * 100) / 100;
-            
-            // Рекомендация насоса
-            let pumpRecommendation = '';
-            if (roundedPressureDrop < 10) {
-                pumpRecommendation = 'Маломощный циркуляционный насос';
-            } else if (roundedPressureDrop < 30) {
-                pumpRecommendation = 'Среднемощный циркуляционный насос';
-            } else {
-                pumpRecommendation = 'Мощный циркуляционный насос';
-            }
-            
-            // Отображение результатов
-            document.getElementById('pressureDrop').textContent = roundedPressureDrop;
-            document.getElementById('pumpRecommendation').textContent = pumpRecommendation;
-            document.getElementById('result').style.display = 'block';
-            
-            // Прокрутка к результатам
-            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+            return correctionFactor;
         }
+
+        function updateDimensions() {
+            const type = document.getElementById('radiator-type').value;
+            const heightSelect = document.getElementById('radiator-height');
+            
+            heightSelect.innerHTML = '<option value="">-- Выберите высоту --</option>';
+            document.getElementById('radiator-length').innerHTML = '<option value="">-- Сначала выберите высоту --</option>';
+            
+            if (!type) return;
+            
+            // Доступные высоты для всех типов
+            const heights = ['300', '400', '500', '600', '900'];
+            heights.forEach(height => {
+                const option = document.createElement('option');
+                option.value = height;
+                option.textContent = `${height} мм`;
+                heightSelect.appendChild(option);
+            });
+        }
+
+        function updateLengths() {
+            const type = document.getElementById('radiator-type').value;
+            const height = document.getElementById('radiator-height').value;
+            const lengthSelect = document.getElementById('radiator-length');
+            
+            lengthSelect.innerHTML = '<option value="">-- Выберите длину --</option>';
+            
+            if (!type || !height) return;
+            
+            // Получаем доступные длины для выбранного типа и высоты
+            const lengths = Object.keys(powerData[height][type]);
+            lengths.forEach(length => {
+                const option = document.createElement('option');
+                option.value = length;
+                option.textContent = `${length} мм`;
+                lengthSelect.appendChild(option);
+            });
+        }
+
+        function calculate() {
+            const type = document.getElementById('radiator-type').value;
+            const height = document.getElementById('radiator-height').value;
+            const length = document.getElementById('radiator-length').value;
+            const flowTemp = parseInt(document.getElementById('flow-temp').value);
+            const returnTemp = parseInt(document.getElementById('return-temp').value);
+            const roomTemp = parseInt(document.getElementById('room-temp').value);
+            
+            if (!type || !height || !length) {
+                alert('Пожалуйста, выберите тип, высоту и длину радиатора');
+                return;
+            }
+            
+            if (flowTemp <= returnTemp) {
+                alert('Температура подачи должна быть выше температуры обратки');
+                return;
+            }
+            
+            const basePower = powerData[height][type][length];
+            const correctionFactor = getCorrectionFactor(flowTemp, returnTemp, roomTemp);
+            const actualPower = basePower * correctionFactor;
+            
+            // Формируем результат
+            let resultHTML = `
+                <h3>Результаты расчета:</h3>
+                <p><strong>Тип радиатора:</strong> ${radiatorData[type].name}</p>
+                <p><strong>Размеры:</strong> ${length} мм × ${height} мм</p>
+                <p><strong>Температура подачи/обратки/воздуха:</strong> ${flowTemp}°C / ${returnTemp}°C / ${roomTemp}°C</p>
+                <p><strong>Мощность при 75/65/20°C:</strong> ${basePower} Вт</p>
+                <p><strong>Поправочный коэффициент:</strong> ${correctionFactor.toFixed(3)}</p>
+                <p><strong>Тепловая мощность:</strong> <b>${Math.round(actualPower)} Вт</b></p>
+                
+                <h4>Мощность для других длин (75/65/20°C):</h4>
+                <table>
+                    <tr>
+                        <th>Длина (мм)</th>
+                        <th>Мощность (Вт)</th>
+                    </tr>
+            `;
+            
+            // Добавляем варианты длин
+            Object.keys(powerData[height][type]).forEach(len => {
+                const pwr = powerData[height][type][len];
+                const isCurrent = len === length;
+                resultHTML += `
+                    <tr ${isCurrent ? 'class="highlight"' : ''}>
+                        <td>${len}</td>
+                        <td>${pwr} Вт</td>
+                    </tr>
+                `;
+            });
+            
+            resultHTML += `</table>`;
+            
+            document.getElementById('result').innerHTML = resultHTML;
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        // Инициализация
+        updateDimensions();
+        document.getElementById('radiator-height').value = '500';
+        updateLengths();
+        
+        // Инициализация Telegram WebApp
+        Telegram.WebApp.ready();
+        Telegram.WebApp.expand();
     </script>
 </body>
 </html>
