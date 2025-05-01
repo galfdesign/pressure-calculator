@@ -3,50 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Калькулятор радиаторов</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Тепловой калькулятор GalfDesign</title>
     <style>
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
-            background-color: #f8f8f8;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f8f9fa;
             color: #333;
-            line-height: 1.4;
-            font-size: 15px;
-        }
-        .container {
-            background-color: white;
-            border-radius: 12px;
+            line-height: 1.6;
             padding: 15px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-            max-width: 100%;
+        }
+        .calculator {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             overflow: hidden;
         }
-        h1 {
-            color: #2a5885;
-            font-size: 18px;
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 18px 20px;
             text-align: center;
-            margin: 0 0 15px 0;
+        }
+        .header h1 {
+            font-size: 20px;
             font-weight: 600;
         }
-        .input-group {
-            margin-bottom: 12px;
+        .content {
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 18px;
         }
         label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-weight: 500;
-            font-size: 14px;
+            color: #2c3e50;
+            font-size: 15px;
         }
-        select, input {
+        select {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 15px;
             border: 1px solid #ddd;
             border-radius: 8px;
             background-color: white;
@@ -54,250 +59,178 @@
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
-        }
-        select {
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
             background-repeat: no-repeat;
-            background-position: right 10px center;
+            background-position: right 12px center;
             background-size: 16px;
         }
+        .temp-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .temp-group {
+            margin-bottom: 0;
+        }
         button {
-            background-color: #4CAF50;
+            background: #3498db;
             color: white;
             border: none;
-            padding: 12px;
+            padding: 15px;
             border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
             font-size: 16px;
-            margin-top: 10px;
             font-weight: 500;
-            transition: background-color 0.2s;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
         }
-        button:active {
-            background-color: #3d8b40;
-            transform: scale(0.98);
+        button:hover {
+            background: #2980b9;
         }
         .result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f0f9f1;
+            margin-top: 25px;
+            background: #f1f8fe;
             border-radius: 8px;
+            padding: 20px;
             display: none;
         }
-        .result h3 {
-            margin-top: 0;
-            color: #2a5885;
-            font-size: 16px;
-        }
-        .note {
-            font-size: 13px;
-            color: #666;
-            margin: 15px 0 5px 0;
+        .power {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2c3e50;
             text-align: center;
-            line-height: 1.5;
+            margin: 10px 0;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
-            font-size: 14px;
-            table-layout: fixed;
+        .details {
+            margin-top: 15px;
         }
-        th, td {
-            border: 1px solid #e0e0e0;
-            padding: 8px;
-            text-align: left;
-            word-wrap: break-word;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: 500;
-        }
-        .highlight {
-            background-color: #fff8e1;
-        }
-        .temp-inputs {
+        .detail-row {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
         }
-        .temp-inputs > div {
-            flex: 1;
-            min-width: 100px;
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            color: #7f8c8d;
+        }
+        .detail-value {
+            font-weight: 500;
         }
         .brand {
             text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
             font-size: 14px;
-            color: #666;
-            margin: 15px 0 5px 0;
             font-weight: 500;
         }
         
         @media (max-width: 480px) {
-            body {
-                padding: 8px;
-                font-size: 14px;
+            .content {
+                padding: 15px;
             }
-            .container {
-                padding: 12px;
-                border-radius: 10px;
+            .temp-grid {
+                grid-template-columns: 1fr;
             }
-            h1 {
-                font-size: 17px;
-            }
-            select, input {
-                padding: 9px 10px;
-                font-size: 14px;
-            }
-            .temp-inputs > div {
-                min-width: calc(33% - 6px);
-            }
-            table {
-                font-size: 13px;
-            }
-            th, td {
-                padding: 6px;
-            }
-        }
-        
-        @media (max-width: 360px) {
-            .temp-inputs > div {
-                min-width: 100%;
+            .header h1 {
+                font-size: 18px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Калькулятор подбора радиаторов</h1>
-        
-        <div class="input-group">
-            <label for="radiator-type">Тип радиатора:</label>
-            <select id="radiator-type" onchange="updateDimensions()">
-                <option value="">-- Выберите тип --</option>
-                <option value="10">Тип 10</option>
-                <option value="11">Тип 11</option>
-                <option value="12">Тип 12</option>
-                <option value="22" selected>Тип 22</option>
-                <option value="33">Тип 33</option>
-            </select>
+    <div class="calculator">
+        <div class="header">
+            <h1>Калькулятор мощности радиаторов</h1>
         </div>
         
-        <div class="input-group">
-            <label for="radiator-height">Высота (мм):</label>
-            <select id="radiator-height" onchange="updateLengths()">
-                <option value="">-- Сначала выберите тип --</option>
-                <option value="300">300</option>
-                <option value="400">400</option>
-                <option value="500" selected>500</option>
-                <option value="600">600</option>
-                <option value="900">900</option>
-            </select>
-        </div>
-        
-        <div class="input-group">
-            <label for="radiator-length">Длина (мм):</label>
-            <select id="radiator-length">
-                <option value="">-- Сначала выберите высоту --</option>
-            </select>
-        </div>
-        
-        <div class="input-group">
-            <label for="connection-type">Тип подключения:</label>
-            <select id="connection-type">
-                <option value="diagonal" selected>Диагональное (1-3) - 100%</option>
-                <option value="side">Боковое (1-2) - 96%</option>
-                <option value="bottom">Нижнее (1-1) - 90%</option>
-                <option value="one-side">Одностороннее (1-4) - 86%</option>
-            </select>
-        </div>
-        
-        <div class="input-group">
-            <label>Температурные параметры:</label>
-            <div class="temp-inputs">
-                <div>
-                    <label for="flow-temp">Подача (°C)</label>
-                    <select id="flow-temp">
-                        <option value="35">35</option>
-                        <option value="40">40</option>
-                        <option value="45">45</option>
-                        <option value="50">50</option>
-                        <option value="55">55</option>
-                        <option value="60">60</option>
-                        <option value="65">65</option>
-                        <option value="70">70</option>
-                        <option value="75" selected>75</option>
-                        <option value="80">80</option>
-                        <option value="85">85</option>
-                        <option value="90">90</option>
-                        <option value="95">95</option>
-                        <option value="100">100</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="return-temp">Обратка (°C)</label>
-                    <select id="return-temp">
-                        <option value="20">20</option>
-                        <option value="25">25</option>
-                        <option value="30">30</option>
-                        <option value="35">35</option>
-                        <option value="40">40</option>
-                        <option value="45">45</option>
-                        <option value="50">50</option>
-                        <option value="55">55</option>
-                        <option value="60">60</option>
-                        <option value="65" selected>65</option>
-                        <option value="70">70</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="room-temp">Воздух (°C)</label>
-                    <select id="room-temp">
-                        <option value="10">10</option>
-                        <option value="15">15</option>
-                        <option value="18">18</option>
-                        <option value="20" selected>20</option>
-                        <option value="22">22</option>
-                        <option value="24">24</option>
-                        <option value="26">26</option>
-                    </select>
+        <div class="content">
+            <div class="form-group">
+                <label for="radiator-type">Тип радиатора</label>
+                <select id="radiator-type" onchange="updateDimensions()">
+                    <option value="">-- Выберите тип --</option>
+                    <option value="10">Тип 10 (1 панель)</option>
+                    <option value="11">Тип 11 (1 панель + 1 конвектор)</option>
+                    <option value="12">Тип 12 (2 панели)</option>
+                    <option value="22" selected>Тип 22 (2 панели + 2 конвектора)</option>
+                    <option value="33">Тип 33 (3 панели + 3 конвектора)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="radiator-height">Высота радиатора (мм)</label>
+                <select id="radiator-height" onchange="updateLengths()">
+                    <option value="">-- Сначала выберите тип --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="radiator-length">Длина радиатора (мм)</label>
+                <select id="radiator-length">
+                    <option value="">-- Сначала выберите высоту --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Температурные параметры</label>
+                <div class="temp-grid">
+                    <div class="temp-group">
+                        <label for="flow-temp">Подача (°C)</label>
+                        <select id="flow-temp">
+                            <option value="50">50</option>
+                            <option value="55">55</option>
+                            <option value="60">60</option>
+                            <option value="65">65</option>
+                            <option value="70">70</option>
+                            <option value="75" selected>75</option>
+                            <option value="80">80</option>
+                            <option value="85">85</option>
+                            <option value="90">90</option>
+                        </select>
+                    </div>
+                    <div class="temp-group">
+                        <label for="return-temp">Обратка (°C)</label>
+                        <select id="return-temp">
+                            <option value="40">40</option>
+                            <option value="45">45</option>
+                            <option value="50">50</option>
+                            <option value="55">55</option>
+                            <option value="60">60</option>
+                            <option value="65" selected>65</option>
+                            <option value="70">70</option>
+                        </select>
+                    </div>
+                    <div class="temp-group">
+                        <label for="room-temp">Воздух (°C)</label>
+                        <select id="room-temp">
+                            <option value="18">18</option>
+                            <option value="20" selected>20</option>
+                            <option value="22">22</option>
+                            <option value="24">24</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <button onclick="calculate()">Рассчитать мощность</button>
-        
-        <div id="result" class="result"></div>
-        
-        <div class="note">
-            Данные о мощности соответствуют технической документации производителя.
-            Поправочные коэффициенты применяются автоматически согласно DIN EN 442.
+            
+            <button onclick="calculate()">РАССЧИТАТЬ МОЩНОСТЬ</button>
+            
+            <div id="result" class="result">
+                <div style="text-align: center;">Тепловая мощность</div>
+                <div class="power" id="power-value">0 Вт</div>
+                <div class="details" id="result-details"></div>
+            </div>
         </div>
     </div>
     
-    <div class="brand">Galf Design</div>
+    <div class="brand">GalfDesign</div>
 
     <script>
-        // Точные данные из каталога Kermi (стр. 24)
-        const radiatorData = {
-            '10': { name: "Тип 10" },
-            '11': { name: "Тип 11" },
-            '12': { name: "Тип 12" },
-            '22': { name: "Тип 22" },
-            '33': { name: "Тип 33" }
-        };
-
-        // Коэффициенты для разных типов подключения
-        const connectionFactors = {
-            'diagonal': 1.0,    // Диагональное (1-3)
-            'side': 0.96,       // Боковое (1-2)
-            'bottom': 0.90,     // Нижнее (1-1)
-            'one-side': 0.86    // Одностороннее (1-4)
-        };
-
-        // Данные о мощности (Вт) для 75/65/20°C
-        const powerData = {
+        // Данные о мощности радиаторов (Вт) для 75/65/20°C
+        const radiatorDB = {
             '300': {
                 '10': { '400': 144, '500': 180, '600': 439, '700': 513, '800': 586, '900': 659, '1000': 732, '1100': 806, '1200': 879, '1300': 952, '1400': 1025, '1600': 1172, '1800': 1318, '2000': 1465, '2300': 1684, '2600': 1904, '3000': 2197 },
                 '11': { '400': 239, '500': 299, '600': 647, '700': 755, '800': 862, '900': 970, '1000': 1078, '1100': 1186, '1200': 1294, '1300': 1401, '1400': 1509, '1600': 1725, '1800': 1940, '2000': 2156, '2300': 2479, '2600': 2803, '3000': 3234 },
@@ -335,46 +268,42 @@
             }
         };
 
-        // Функция для получения поправочного коэффициента
-        function getCorrectionFactor(tV, tR, tL) {
-            // Расчет ΔT (логарифмическая разница температур)
-            const deltaT1 = tV - tL;
-            const deltaT2 = tR - tL;
+        // Функция расчета поправочного коэффициента температуры
+        function calculateTempFactor(flowTemp, returnTemp, roomTemp) {
+            const deltaT1 = flowTemp - roomTemp;
+            const deltaT2 = returnTemp - roomTemp;
             
             if (deltaT1 <= 0 || deltaT2 <= 0) return 0;
             
             const deltaT = (deltaT1 - deltaT2) / Math.log(deltaT1 / deltaT2);
-            
-            // Расчет стандартного ΔT50 (для 75/65/20°C)
-            const deltaT50 = (75 - 65) / Math.log((75 - 20) / (65 - 20));
-            
-            // Коэффициент пересчета по формуле (ΔT/ΔT50)^n
-            // Где n = 1.3 для радиаторов Kermi
-            const n = 1.3;
-            const correctionFactor = Math.pow(deltaT / deltaT50, n);
-            
-            return correctionFactor;
+            const standardDeltaT = (75 - 65) / Math.log((75 - 20) / (65 - 20));
+            const n = 1.3; // Коэффициент для радиаторов
+            return Math.pow(deltaT / standardDeltaT, n);
         }
 
+        // Обновление списка доступных высот
         function updateDimensions() {
-            const type = document.getElementById('radiator-type').value;
+            const typeSelect = document.getElementById('radiator-type');
             const heightSelect = document.getElementById('radiator-height');
             
             heightSelect.innerHTML = '<option value="">-- Выберите высоту --</option>';
             document.getElementById('radiator-length').innerHTML = '<option value="">-- Сначала выберите высоту --</option>';
             
-            if (!type) return;
+            if (!typeSelect.value) return;
             
-            // Доступные высоты для всех типов
             const heights = ['300', '400', '500', '600', '900'];
             heights.forEach(height => {
                 const option = document.createElement('option');
                 option.value = height;
                 option.textContent = `${height} мм`;
+                if (height === '500') option.selected = true;
                 heightSelect.appendChild(option);
             });
+            
+            updateLengths();
         }
 
+        // Обновление списка доступных длин
         function updateLengths() {
             const type = document.getElementById('radiator-type').value;
             const height = document.getElementById('radiator-height').value;
@@ -384,25 +313,27 @@
             
             if (!type || !height) return;
             
-            // Получаем доступные длины для выбранного типа и высоты
-            const lengths = Object.keys(powerData[height][type]);
+            const lengths = Object.keys(radiatorDB[height][type]).sort((a, b) => a - b);
             lengths.forEach(length => {
                 const option = document.createElement('option');
                 option.value = length;
                 option.textContent = `${length} мм`;
+                if (length === '1000') option.selected = true;
                 lengthSelect.appendChild(option);
             });
         }
 
+        // Основная функция расчета
         function calculate() {
+            // Получаем значения из формы
             const type = document.getElementById('radiator-type').value;
             const height = document.getElementById('radiator-height').value;
             const length = document.getElementById('radiator-length').value;
-            const connectionType = document.getElementById('connection-type').value;
             const flowTemp = parseInt(document.getElementById('flow-temp').value);
             const returnTemp = parseInt(document.getElementById('return-temp').value);
             const roomTemp = parseInt(document.getElementById('room-temp').value);
             
+            // Проверяем ввод
             if (!type || !height || !length) {
                 alert('Пожалуйста, выберите тип, высоту и длину радиатора');
                 return;
@@ -413,58 +344,76 @@
                 return;
             }
             
-            const basePower = powerData[height][type][length];
-            const tempCorrectionFactor = getCorrectionFactor(flowTemp, returnTemp, roomTemp);
-            const connectionFactor = connectionFactors[connectionType];
-            const actualPower = basePower * tempCorrectionFactor * connectionFactor;
+            // Получаем базовую мощность
+            const basePower = radiatorDB[height][type][length];
             
-            // Формируем результат
-            let resultHTML = `
-                <h3>Результаты расчета:</h3>
-                <p><strong>Тип радиатора:</strong> ${radiatorData[type].name}</p>
-                <p><strong>Размеры:</strong> ${length} мм × ${height} мм</p>
-                <p><strong>Тип подключения:</strong> ${document.getElementById('connection-type').options[document.getElementById('connection-type').selectedIndex].text}</p>
-                <p><strong>Температура подачи/обратки/воздуха:</strong> ${flowTemp}°C / ${returnTemp}°C / ${roomTemp}°C</p>
-                <p><strong>Мощность при 75/65/20°C:</strong> ${basePower} Вт</p>
-                <p><strong>Поправочный коэффициент (температура):</strong> ${tempCorrectionFactor.toFixed(3)}</p>
-                <p><strong>Коэффициент подключения:</strong> ${connectionFactor.toFixed(3)}</p>
-                <p><strong>Тепловая мощность:</strong> <b>${Math.round(actualPower)} Вт</b></p>
-                
-                <h4>Мощность для других длин (75/65/20°C):</h4>
-                <table>
-                    <tr>
-                        <th>Длина (мм)</th>
-                        <th>Мощность (Вт)</th>
-                    </tr>
+            // Рассчитываем поправочный коэффициент
+            const tempFactor = calculateTempFactor(flowTemp, returnTemp, roomTemp);
+            
+            // Итоговая мощность
+            const actualPower = Math.round(basePower * tempFactor);
+            
+            // Отображаем результат
+            showResult(type, height, length, flowTemp, returnTemp, roomTemp, basePower, tempFactor, actualPower);
+        }
+
+        // Функция отображения результатов
+        function showResult(type, height, length, flowTemp, returnTemp, roomTemp, basePower, tempFactor, actualPower) {
+            // Названия типов радиаторов
+            const typeNames = {
+                '10': 'Тип 10 (1 панель)',
+                '11': 'Тип 11 (1 панель + 1 конвектор)',
+                '12': 'Тип 12 (2 панели)',
+                '22': 'Тип 22 (2 панели + 2 конвектора)',
+                '33': 'Тип 33 (3 панели + 3 конвектора)'
+            };
+            
+            // Устанавливаем мощность
+            document.getElementById('power-value').textContent = `${actualPower} Вт`;
+            
+            // Формируем детали
+            const detailsHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">Модель радиатора:</span>
+                    <span class="detail-value">${typeNames[type]}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Размеры:</span>
+                    <span class="detail-value">${length} × ${height} мм</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Температура подачи:</span>
+                    <span class="detail-value">${flowTemp}°C</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Температура обратки:</span>
+                    <span class="detail-value">${returnTemp}°C</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Температура воздуха:</span>
+                    <span class="detail-value">${roomTemp}°C</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Мощность (75/65/20°C):</span>
+                    <span class="detail-value">${basePower} Вт</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Поправочный коэффициент:</span>
+                    <span class="detail-value">${tempFactor.toFixed(3)}</span>
+                </div>
             `;
             
-            // Добавляем варианты длин
-            Object.keys(powerData[height][type]).forEach(len => {
-                const pwr = powerData[height][type][len];
-                const isCurrent = len === length;
-                resultHTML += `
-                    <tr ${isCurrent ? 'class="highlight"' : ''}>
-                        <td>${len}</td>
-                        <td>${pwr} Вт</td>
-                    </tr>
-                `;
-            });
-            
-            resultHTML += `</table>`;
-            
-            document.getElementById('result').innerHTML = resultHTML;
+            document.getElementById('result-details').innerHTML = detailsHTML;
             document.getElementById('result').style.display = 'block';
-            document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
         }
-        
-        // Инициализация
-        updateDimensions();
-        document.getElementById('radiator-height').value = '500';
-        updateLengths();
-        
-        // Инициализация Telegram WebApp
-        Telegram.WebApp.ready();
-        Telegram.WebApp.expand();
+
+        // Инициализация при загрузке
+        window.onload = function() {
+            // Устанавливаем стандартные значения
+            document.getElementById('radiator-type').value = '22';
+            updateDimensions();
+        };
     </script>
 </body>
 </html>
